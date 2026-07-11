@@ -1,4 +1,4 @@
-package io.github.rezakaramad.probe;
+package io.github.rezakaramad.probe.valkey;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisClient;

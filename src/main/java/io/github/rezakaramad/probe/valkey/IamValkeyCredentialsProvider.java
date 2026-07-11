@@ -1,4 +1,4 @@
-package io.github.rezakaramad.probe;
+package io.github.rezakaramad.probe.valkey;
 
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;

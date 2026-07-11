@@ -1,4 +1,4 @@
-package io.github.rezakaramad.probe;
+package io.github.rezakaramad.probe.valkey;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

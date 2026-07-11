@@ -1,4 +1,4 @@
-package io.github.rezakaramad.probe;
+package io.github.rezakaramad.probe.valkey;
 
 // The validation annotations used to reject bad inputs before they reach Valkey.
 import jakarta.validation.Valid;

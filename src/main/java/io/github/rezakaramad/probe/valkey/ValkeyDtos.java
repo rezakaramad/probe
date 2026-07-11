@@ -1,4 +1,4 @@
-package io.github.rezakaramad.probe;
+package io.github.rezakaramad.probe.valkey;
 
 import java.time.Instant;
 

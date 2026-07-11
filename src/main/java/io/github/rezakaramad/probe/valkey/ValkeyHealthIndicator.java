@@ -1,4 +1,4 @@
-package io.github.rezakaramad.probe;
+package io.github.rezakaramad.probe.valkey;
 
 import io.lettuce.core.api.StatefulRedisConnection;
 import org.springframework.boot.actuate.health.Health;

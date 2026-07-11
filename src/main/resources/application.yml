@@ -10,6 +10,21 @@ valkey:
   iam-auth-enabled: ${VALKEY_IAM_AUTH_ENABLED:true}
   timeout-seconds: 10
 
+# Echo endpoint (/api/echo) — reflects the request back as JSON for debugging.
+echo:
+  # Max request-body bytes echoed back; larger bodies are truncated and flagged.
+  max-body-bytes: ${ECHO_MAX_BODY_BYTES:65536}
+  # Header values redacted by default (case-insensitive). Prevents leaking secrets
+  # into echoed responses / logs / screenshots.
+  sensitive-headers: ${ECHO_SENSITIVE_HEADERS:authorization,cookie,set-cookie,proxy-authorization}
+  # Whether ?revealSensitive=true may un-redact sensitive headers. Set false in
+  # sensitive environments to forbid the override entirely.
+  reveal-sensitive-allowed: ${ECHO_REVEAL_SENSITIVE_ALLOWED:true}
+  # Whether callers may shape the response (status/delay/content-type overrides).
+  configurable-response-enabled: ${ECHO_CONFIGURABLE_RESPONSE_ENABLED:true}
+  # Hard cap on the artificial response delay in ms (DoS guard); requests above are clamped.
+  max-delay-ms: ${ECHO_MAX_DELAY_MS:10000}
+
 spring:
   application:
     name: probe
