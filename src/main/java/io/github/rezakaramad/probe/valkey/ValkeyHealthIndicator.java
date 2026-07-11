@@ -3,6 +3,7 @@ package io.github.rezakaramad.probe.valkey;
 import io.lettuce.core.api.StatefulRedisConnection;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,8 +15,8 @@ public class ValkeyHealthIndicator implements HealthIndicator {
     // Lettuce connection to Valkey Redis server
     private final StatefulRedisConnection<String, String> connection;
 
-    // Constructor injection of the Lettuce connection
-    public ValkeyHealthIndicator(StatefulRedisConnection<String, String> connection) {
+    // @Lazy: resolves the connection proxy on first health() call, not at startup.
+    public ValkeyHealthIndicator(@Lazy StatefulRedisConnection<String, String> connection) {
         this.connection = connection;
     }
 

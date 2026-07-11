@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -86,8 +87,10 @@ public class ValkeyConfig {
     }
 
     // Opens a real TCP connection to Valkey using the RedisClient.
-    // This connection is used to execute commands on Valkey.
-    // The connection is closed when the application shuts down.
+    // @Lazy: the connection is created on first use, not at startup — so the app boots
+    // successfully even when Valkey is unreachable. The health check will return DOWN and
+    // API calls will return 503 until Valkey is available; auto-reconnect handles recovery.
+    @Lazy
     @Bean(destroyMethod = "close")
     public StatefulRedisConnection<String, String> valkeyConnection(RedisClient client) {
         return client.connect();
