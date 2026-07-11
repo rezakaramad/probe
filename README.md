@@ -17,6 +17,12 @@ cloud services and networking endpoints.
 The first supported target is **GCP Valkey** over **TLS + IAM auth**
 (PING/SET/GET via `/api/valkey/*`).
 
+It also ships an **echo** endpoint (`/api/echo`) that reflects the incoming
+request back as JSON, method, path, headers, query, body, and source IP, for
+debugging clients, proxies, and ingress rewrites. Sensitive headers
+(`Authorization`, `Cookie`, …) are redacted by default. Callers can also shape
+the response for testing client behaviour: `x-set-response-status-code` to force
+a status and `x-set-response-delay-ms` to add a (capped) delay.
+
 Support for additional services and
 networking endpoints is planned.
-
