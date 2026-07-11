@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'io.github.rezakaramad'
+version = '0.1.0'
+description = 'Probe - GCP Valkey connectivity demo with TLS + IAM auth'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    googleAuthVersion = '1.30.0'
+    testcontainersVersion = '2.0.5'
+}
+
+// Spring Boot 3.4.1's dependency-management BOM pins testcontainers 1.20.4.
+// We override it to 2.0.5, which removed the hardcoded API 1.32 ping that
+// modern Docker daemons (min 1.40) reject.
+ext['testcontainers.version'] = testcontainersVersion
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Mints GCP IAM access tokens via Workload Identity (ADC / metadata server).
+    implementation "com.google.auth:google-auth-library-oauth2-http:${googleAuthVersion}"
+
+    // Generates metadata for @ConfigurationProperties (IDE hints, docs).
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // testcontainers 2.x: core fixed the hardcoded API 1.32 ping; the JUnit 5
+    // extension is a separate artifact still on its own version line (1.21.4).
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Emit a stable artifact name (build/libs/app.jar) so CI and the Dockerfile
+// don't have to agree on a version-encoded filename. The image tag carries
+// the version (git SHA); the jar inside the image is always app.jar.
+tasks.named('bootJar') {
+    archiveFileName = 'app.jar'
+}

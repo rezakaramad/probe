@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GCP Valkey Demo</title>
+  <style>
+    :root {
+      --bg: #0f1420;
+      --panel: #171e2e;
+      --panel-2: #1e2942;
+      --text: #e6ebf5;
+      --muted: #8f9bb3;
+      --accent: #6743f0;
+      --ok: #2f855a;
+      --err: #c53030;
+      --border: #2a3550;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 { font-size: 20px; margin: 0; }
+    header .badge {
+      font-size: 12px; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 2px 10px;
+    }
+    main {
+      max-width: 900px; margin: 0 auto; padding: 32px;
+      display: grid; gap: 24px;
+    }
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px;
+    }
+    .card h2 { margin: 0 0 16px; font-size: 15px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+    label { font-size: 12px; color: var(--muted); }
+    input {
+      background: var(--panel-2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 10px 12px; font-size: 14px;
+    }
+    button {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 10px 18px; font-size: 14px; cursor: pointer;
+      font-weight: 600;
+    }
+    button.secondary { background: var(--panel-2); border: 1px solid var(--border); }
+    button:hover { opacity: .92; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .info-item { background: var(--panel-2); border-radius: 8px; padding: 12px 14px; }
+    .info-item .k { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+    .info-item .v { font-size: 15px; margin-top: 2px; word-break: break-all; }
+    .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .pill.on { background: rgba(47,133,90,.2); color: #68d391; }
+    .pill.off { background: rgba(197,48,48,.2); color: #fc8181; }
+    #log {
+      background: #0a0e17; border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px; height: 240px; overflow-y: auto; white-space: pre-wrap;
+    }
+    .log-ok { color: #68d391; }
+    .log-err { color: #fc8181; }
+    .log-dim { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>GCP Valkey Demo</h1>
+    <span class="badge">TLS + IAM auth via Workload Identity</span>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Connection</h2>
+      <div class="info-grid" id="info">
+        <div class="info-item"><div class="k">Host</div><div class="v" id="info-host">…</div></div>
+        <div class="info-item"><div class="k">Port</div><div class="v" id="info-port">…</div></div>
+        <div class="info-item"><div class="k">TLS</div><div class="v" id="info-ssl">…</div></div>
+        <div class="info-item"><div class="k">IAM Auth</div><div class="v" id="info-iam">…</div></div>
+      </div>
+      <div class="row" style="margin-top:16px">
+        <button onclick="ping()">PING</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Set a value</h2>
+      <div class="row">
+        <div class="field"><label>Key</label><input id="set-key" value="demo:greeting" /></div>
+        <div class="field"><label>Value</label><input id="set-value" value="hello from valkey" /></div>
+        <div class="field" style="max-width:120px"><label>TTL (s)</label><input id="set-ttl" type="number" value="300" /></div>
+        <button onclick="setValue()">SET</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Get a value</h2>
+      <div class="row">
+        <div class="field"><label>Key</label><input id="get-key" value="demo:greeting" /></div>
+        <button class="secondary" onclick="getValue()">GET</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Activity log</h2>
+      <div id="log"></div>
+    </section>
+  </main>
+
+  <script>
+    const logEl = document.getElementById('log');
+
+    function log(msg, cls = 'log-dim') {
+      const line = document.createElement('div');
+      line.className = cls;
+      const t = new Date().toLocaleTimeString();
+      line.textContent = `[${t}] ${msg}`;
+      logEl.prepend(line);
+    }
+
+    async function call(path, opts) {
+      try {
+        const res = await fetch(path, opts);
+        const data = await res.json();
+        if (!res.ok) {
+          // RFC 7807 ProblemDetail from the global exception handler.
+          log(`${data.title || 'Error'}: ${data.detail || res.status}`, 'log-err');
+          return null;
+        }
+        return data;
+      } catch (e) {
+        log('Request failed: ' + e, 'log-err');
+        return null;
+      }
+    }
+
+    async function loadInfo() {
+      try {
+        const res = await fetch('/api/valkey/info');
+        const i = await res.json();
+        document.getElementById('info-host').textContent = i.host;
+        document.getElementById('info-port').textContent = i.port;
+        document.getElementById('info-ssl').innerHTML = pill(i.sslEnabled);
+        document.getElementById('info-iam').innerHTML = pill(i.iamAuthEnabled);
+      } catch (e) {
+        log('Could not load connection info: ' + e, 'log-err');
+      }
+    }
+
+    function pill(on) {
+      return on
+        ? '<span class="pill on">enabled</span>'
+        : '<span class="pill off">disabled</span>';
+    }
+
+    function ping() {
+      call('/api/valkey/ping').then(d => {
+        if (d) log(`PING -> ${d.reply}  (${d.latencyMs} ms)`, d.ok ? 'log-ok' : 'log-err');
+      });
+    }
+
+    function setValue() {
+      const body = {
+        key: document.getElementById('set-key').value,
+        value: document.getElementById('set-value').value,
+        ttlSeconds: Number(document.getElementById('set-ttl').value) || 300
+      };
+      call('/api/valkey/set', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      }).then(d => {
+        if (d) log(`SET ${d.key} (ttl ${d.ttlSeconds}s)  (${d.latencyMs} ms)`, 'log-ok');
+      });
+    }
+
+    function getValue() {
+      const key = encodeURIComponent(document.getElementById('get-key').value);
+      call('/api/valkey/get?key=' + key).then(d => {
+        if (!d) return;
+        if (d.found) log(`GET ${d.key} -> "${d.value}"  (${d.latencyMs} ms)`, 'log-ok');
+        else log(`GET ${d.key} -> (nil)  (${d.latencyMs} ms)`, 'log-err');
+      });
+    }
+
+    loadInfo();
+    log('UI ready. Try PING to verify connectivity.', 'log-dim');
+  </script>
+</body>
+</html>

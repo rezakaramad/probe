@@ -1,0 +1,48 @@
+# Valkey connection details.
+# On the Platform, VALKEY_HOST and VALKEY_PORT are injected by the XDeployment
+# function from the Valkey connection-details Secret. Locally they default below.
+valkey:
+  host: ${VALKEY_HOST:localhost}
+  port: ${VALKEY_PORT:6379}
+  # SERVER_AUTHENTICATION on the Memorystore instance -> TLS required.
+  ssl-enabled: ${VALKEY_SSL_ENABLED:true}
+  # IAM_AUTH on the Memorystore instance -> use a rotating GCP access token as password.
+  iam-auth-enabled: ${VALKEY_IAM_AUTH_ENABLED:true}
+  timeout-seconds: 10
+
+spring:
+  application:
+    name: probe
+  lifecycle:
+    # Let in-flight requests finish before shutdown (works with SIGTERM in K8s).
+    timeout-per-shutdown-phase: 20s
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+      group:
+        # Kubernetes readiness: gate traffic on Valkey connectivity.
+        readiness:
+          include: readinessState,valkey
+        # Kubernetes liveness: process health only (never depend on Valkey).
+        liveness:
+          include: livenessState
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: Demo proving GCP Memorystore Valkey connectivity (TLS + IAM auth)
