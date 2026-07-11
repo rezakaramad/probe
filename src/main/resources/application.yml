@@ -17,9 +17,10 @@ echo:
   # Header values redacted by default (case-insensitive). Prevents leaking secrets
   # into echoed responses / logs / screenshots.
   sensitive-headers: ${ECHO_SENSITIVE_HEADERS:authorization,cookie,set-cookie,proxy-authorization}
-  # Whether ?revealSensitive=true may un-redact sensitive headers. Set false in
-  # sensitive environments to forbid the override entirely.
-  reveal-sensitive-allowed: ${ECHO_REVEAL_SENSITIVE_ALLOWED:true}
+  # Whether ?revealSensitive=true may un-redact sensitive headers.
+  # Defaults to false (redaction is always enforced). Set ECHO_REVEAL_SENSITIVE_ALLOWED=true
+  # to allow callers to opt in to seeing raw sensitive header values.
+  reveal-sensitive-allowed: ${ECHO_REVEAL_SENSITIVE_ALLOWED:false}
   # Whether callers may shape the response (status/delay/content-type overrides).
   configurable-response-enabled: ${ECHO_CONFIGURABLE_RESPONSE_ENABLED:true}
   # Hard cap on the artificial response delay in ms (DoS guard); requests above are clamped.
