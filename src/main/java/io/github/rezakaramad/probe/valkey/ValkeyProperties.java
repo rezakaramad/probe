@@ -28,6 +28,8 @@ public record ValkeyProperties(
 
         boolean sslEnabled,
 
+        boolean sslInsecure,
+
         boolean iamAuthEnabled,
 
         @Min(1) @Max(120)

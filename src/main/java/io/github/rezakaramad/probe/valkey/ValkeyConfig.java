@@ -55,7 +55,8 @@ public class ValkeyConfig {
 
         // If SSL is enabled, configure the URI to use SSL and verify the peer's certificate.
         if (props.sslEnabled()) {
-            uri.withSsl(true).withVerifyPeer(SslVerifyMode.FULL);
+            SslVerifyMode verifyMode = props.sslInsecure() ? SslVerifyMode.NONE : SslVerifyMode.FULL;
+            uri.withSsl(true).withVerifyPeer(verifyMode);
         }
 
         // If IAM authentication is enabled, configure the URI to use the IamValkeyCredentialsProvider
