@@ -5,9 +5,6 @@
   A debugging tool for testing connectivity and access to cloud services and other endpoints.
 </p>
 <p align="center">
-  <a href="https://github.com/r-karamad/probe/actions/workflows/build.yaml">
-    <img src="https://github.com/r-karamad/probe/actions/workflows/build.yaml/badge.svg" alt="Build" />
-  </a>
   <img src="https://img.shields.io/badge/Java-21-orange?style=flat&logo=openjdk" alt="Java 21" />
   <img src="https://img.shields.io/badge/Spring%20Boot-3.4.1-6DB33F?style=flat&logo=springboot" alt="Spring Boot" />
 </p>
