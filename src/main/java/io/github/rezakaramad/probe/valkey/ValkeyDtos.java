@@ -18,8 +18,9 @@ public final class ValkeyDtos {
      * @param port
      * @param sslEnabled
      * @param iamAuthEnabled
+     * @param sslInsecure whether CA verification is intentionally skipped (VALKEY_SSL_INSECURE)
     */
-    public record ConnectionInfo(String host, int port, boolean sslEnabled, boolean iamAuthEnabled) {
+    public record ConnectionInfo(String host, int port, boolean sslEnabled, boolean iamAuthEnabled, boolean sslInsecure) {
     }
 
     /** Result of a PING.

@@ -54,7 +54,8 @@ public class ValkeyController {
     @GetMapping("/info")
     public ValkeyDtos.ConnectionInfo info() {
         return new ValkeyDtos.ConnectionInfo(
-                props.host(), props.port(), props.sslEnabled(), props.iamAuthEnabled());
+                props.host(), props.port(), props.sslEnabled(), props.iamAuthEnabled(),
+                props.sslInsecure());
     }
 
     /** PING the instance.

@@ -79,6 +79,7 @@
     .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
     .pill.on { background: rgba(47,133,90,.14); color: #2f855a; }
     .pill.off { background: rgba(197,48,48,.14); color: #c53030; }
+    .pill.warn { background: rgba(214,122,0,.14); color: #b7610a; }
     #log {
       background: #f0f1f3; border: 1px solid var(--border); border-radius: 8px;
       padding: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -107,6 +108,7 @@
         <div class="info-item"><div class="k">Port</div><div class="v" id="info-port">…</div></div>
         <div class="info-item"><div class="k">TLS</div><div class="v" id="info-ssl">…</div></div>
         <div class="info-item"><div class="k">IAM Auth</div><div class="v" id="info-iam">…</div></div>
+        <div class="info-item"><div class="k">SSL Insecure</div><div class="v" id="info-insecure">…</div></div>
       </div>
       <div class="row" style="margin-top:16px; justify-content:flex-end">
         <button onclick="ping()">PING</button>
@@ -214,6 +216,7 @@
         document.getElementById('info-port').textContent = i.port;
         document.getElementById('info-ssl').innerHTML = pill(i.sslEnabled);
         document.getElementById('info-iam').innerHTML = pill(i.iamAuthEnabled);
+        document.getElementById('info-insecure').innerHTML = pillWarn(i.sslInsecure);
       } catch (e) {
         log('Could not load connection info: ' + e, 'log-err');
       }
@@ -223,6 +226,13 @@
       return on
         ? '<span class="pill on">enabled</span>'
         : '<span class="pill off">disabled</span>';
+    }
+
+    // For flags where "true" is a warning (e.g. SSL insecure).
+    function pillWarn(on) {
+      return on
+        ? '<span class="pill warn">yes</span>'
+        : '<span class="pill off">no</span>';
     }
 
     function ping() {
