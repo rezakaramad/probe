@@ -108,7 +108,7 @@
         <div class="info-item"><div class="k">Port</div><div class="v" id="info-port">…</div></div>
         <div class="info-item"><div class="k">TLS</div><div class="v" id="info-ssl">…</div></div>
         <div class="info-item"><div class="k">IAM Auth</div><div class="v" id="info-iam">…</div></div>
-        <div class="info-item"><div class="k">SSL Insecure</div><div class="v" id="info-insecure">…</div></div>
+        <div class="info-item"><div class="k">CA Verified</div><div class="v" id="info-insecure">…</div></div>
       </div>
       <div class="row" style="margin-top:16px; justify-content:flex-end">
         <button onclick="ping()">PING</button>
@@ -216,7 +216,7 @@
         document.getElementById('info-port').textContent = i.port;
         document.getElementById('info-ssl').innerHTML = pill(i.sslEnabled);
         document.getElementById('info-iam').innerHTML = pill(i.iamAuthEnabled);
-        document.getElementById('info-insecure').innerHTML = pillWarn(i.sslInsecure);
+        document.getElementById('info-insecure').innerHTML = pillYesNo(!i.sslInsecure);
       } catch (e) {
         log('Could not load connection info: ' + e, 'log-err');
       }
@@ -232,6 +232,12 @@
     function pillWarn(on) {
       return on
         ? '<span class="pill warn">yes</span>'
+        : '<span class="pill off">no</span>';
+    }
+
+    function pillYesNo(on) {
+      return on
+        ? '<span class="pill on">yes</span>'
         : '<span class="pill off">no</span>';
     }
 
